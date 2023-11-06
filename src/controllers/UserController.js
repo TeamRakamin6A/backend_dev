@@ -53,11 +53,24 @@ const registerUser = async (req, res, next) => {
   }
 };
 
-const getUserbyId = (req, res, next) => {};
+const getUserbyId = async (req, res, next) => {
+  try {
+    const user = await User.findByPk(req.params.id);
+    return res.status(200).json({ data: user });
+  } catch (error) {
+    next(error);
+  }
+};
 
-const updateUser = (req, res, next) => {};
+const updateUser = (req, res, next) => {
+  try {
+  } catch (error) {}
+};
 
-const getUserLogin = (req, res, next) => {};
+const getUserLogin = (req, res, next) => {
+  try {
+  } catch (error) {}
+};
 
 module.exports = {
   loginUser,
