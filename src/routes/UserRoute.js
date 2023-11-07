@@ -5,9 +5,10 @@ const authMiddleware = require("../middlewares/AuthMiddleware");
 
 UserRouter.post("/login", UsersController.loginUser);
 UserRouter.post("/register", UsersController.registerUser);
-UserRouter.put("/", UsersController.updateUser);
+
 UserRouter.use(authMiddleware);
 UserRouter.get("/:id", UsersController.getUserbyId);
+UserRouter.put("/", UsersController.updateUser);
 UserRouter.get("/", UsersController.getUserLogin);
 
 module.exports = UserRouter;
