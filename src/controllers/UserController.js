@@ -31,22 +31,20 @@ const loginUser = async (req, res, next) => {
 const registerUser = async (req, res, next) => {
   try {
     const { name, email, username, password, role } = req.body;
-    if (!name || !email || !username || !password || !role)
-      throw { name: "errorNotFound" };
 
     const foundUser = await User.findOne({
       where: {
         [Op.or]: [{ email }, { username }],
       },
     });
-    if (foundUser) throw { name: "userAlreadyExist" };
 
-    User.create({ name, email, username, password, role });
+    await User.create({ name, email, username, password, role });
 
     res
       .status(200)
       .json({ status: true, message: "User Created Successfully" });
   } catch (error) {
+    console.log(error.name)
     next(error);
   }
 };
