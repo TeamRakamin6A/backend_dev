@@ -12,7 +12,14 @@ const errorHandler = (err, req, res, next) => {
     res.status(400).json({ status: false, message: "Token is Expired" });
   } else if (err.name === "JsonWebTokenError") {
     res.status(404).json({ status: false, message: "Token is invalid" });
-  } else if (err.name === "InvalidCredentials") {
+  }else if(err.name === "SequelizeUniqueConstraintError"){
+    let messages = err.errors.map((currentError)=>currentError.message)
+    res.status(404).json({ status: false, message: messages});
+  } else if(err.name === "SequelizeValidationError") {
+    let messages = err.errors.map((currentError)=>currentError.message)
+    res.status(404).json({ status: false, message: messages});
+  }
+  else if (err.name === "InvalidCredentials") {
     res
       .status(400)
       .json({ status: false, message: "Wrong Email or Username and Password" });
