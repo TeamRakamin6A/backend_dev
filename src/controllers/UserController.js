@@ -1,6 +1,6 @@
 const { User } = require("../models");
-const { Op } = require("sequelize");
-const { hashPassword, match } = require("../utils/BcryptUtil");
+const { Op, where } = require("sequelize");
+const { match } = require("../utils/BcryptUtil");
 const { generateToken } = require("../utils/JwtUtil");
 
 const loginUser = async (req, res, next) => {
@@ -13,7 +13,7 @@ const loginUser = async (req, res, next) => {
     });
     if (!foundUser) throw { name: "InvalidCredentials" };
 
-    const isPasswordMatch = match(password, foundUser.password);
+    const isPasswordMatch = await match(password, foundUser.password);
     if (!isPasswordMatch) throw { name: "InvalidCredentials" };
 
     const token = generateToken(foundUser);
@@ -39,11 +39,9 @@ const registerUser = async (req, res, next) => {
         [Op.or]: [{ email }, { username }],
       },
     });
-    console.log(foundUser);
     if (foundUser) throw { name: "userAlreadyExist" };
 
-    const hashedPassword = await hashPassword(password);
-    User.create({ name, email, username, password: hashedPassword, role });
+    User.create({ name, email, username, password, role });
 
     res
       .status(200)
@@ -62,14 +60,53 @@ const getUserbyId = async (req, res, next) => {
   }
 };
 
-const updateUser = (req, res, next) => {
+const updateUser = async (req, res, next) => {
   try {
-  } catch (error) {}
+    const { id } = req.loggedUser;
+    const { email, name, username, oldPassword, newPassword, role } = req.body;
+
+    const foundUser = await User.findOne({ where: { id } });
+
+    let updateUser = {
+      email: email || foundUser.email,
+      name: name || foundUser.name,
+      username: username || foundUser.username,
+      role: role || foundUser.role,
+    };
+
+    if (oldPassword) {
+      const isPasswordMatch = await match(oldPassword, foundUser.password);
+      if (isPasswordMatch) {
+        updateUser = {
+          ...updateUser,
+          password: newPassword,
+        };
+      } else {
+        throw { name: "InvalidCredentials" };
+      }
+    }
+
+    await foundUser.update(updateUser);
+    res
+      .status(200)
+      .json({ status: true, message: "User Updated Successfully" });
+  } catch (error) {
+    next(error);
+  }
 };
 
-const getUserLogin = (req, res, next) => {
+const getUserLogin = async (req, res, next) => {
   try {
-  } catch (error) {}
+    const { id } = req.loggedUser;
+    const foundUser = await User.findOne({
+      where: { id },
+      attributes: { exclude: ["createdAt", "updatedAt", "password"] },
+    });
+
+    res.status(200).json({ status: true, data: foundUser });
+  } catch (error) {
+    next(error);
+  }
 };
 
 module.exports = {
