@@ -1,6 +1,6 @@
 const { Item, Category, Item_Category, sequelize } = require("../models");
 
-
+// Create new items
 const addItem = async (req, res, next) => {
     const t = await sequelize.transaction();
     try {
