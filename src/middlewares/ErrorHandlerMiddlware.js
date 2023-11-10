@@ -24,7 +24,10 @@ const errorHandler = (err, req, res, next) => {
     res
       .status(400)
       .json({ status: false, message: "Wrong Email or Username and Password" });
-  } else {
+  } else if (err.name === "undefined") { 
+    res.status(500).json({status: false, message: "File Required!"})
+  } 
+  else {
     res.status(500).json({ status: false, message: "Internal Server Error" });
   }
 };
