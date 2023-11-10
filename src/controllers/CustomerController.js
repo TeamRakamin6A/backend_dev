@@ -5,12 +5,6 @@ const addCustomer = async (req, res, next) => {
   try {
     const { name, address, phone_number, email } = req.body;
 
-    const foundCostumer = await Customer.findOne({
-      where: {
-        [Op.or]: [{ name }, { phone_number }, { email }],
-      },
-    });
-
     await Customer.create({ name, address, phone_number, email });
 
     res
@@ -30,7 +24,7 @@ const getAllCustomer = async (req, res, next) => {
 
     const offset = (page - 1) * limit;
 
-    const customers = await Customer.findAll({
+    const { count, rows: customers } = await Customer.findAndCountAll({
       where: {
         name: {
           [Op.iLike]: `%${nameFilter}%`,
@@ -40,7 +34,21 @@ const getAllCustomer = async (req, res, next) => {
       limit,
     });
 
-    return res.status(200).json(customers);
+    const totalPages = Math.ceil(count / limit);
+
+    const nextPage = page < totalPages ? page + 1 : null;
+    const prevPage = page > 1 ? page - 1 : null;
+
+    const paginationInfo = {
+      totalItems: count,
+      totalPages,
+      currentPage: page,
+      nextPage,
+      prevPage,
+      items: customers,
+    };
+
+    return res.status(200).json(paginationInfo);
   } catch (err) {
     next(err);
   }
@@ -49,6 +57,9 @@ const getAllCustomer = async (req, res, next) => {
 const getCustomerbyId = async (req, res, next) => {
   try {
     const customer = await Customer.findByPk(req.params.id);
+    if (!customer) {
+      throw { name: "ErrorNotFound" };
+    }
     return res.status(200).json({ data: customer });
   } catch (error) {
     next(error);
@@ -81,18 +92,13 @@ const updateCustomer = async (req, res, next) => {
         where: {
           id,
         },
+        returning: true,
       }
     );
 
-    const updatedCustomer = await Customer.findOne({
-      where: {
-        id,
-      },
-    });
-
     res.status(200).json({
       message: "Customer Updated Successfully",
-      data: updatedCustomer,
+      data: customer,
     });
   } catch (err) {
     next(err);
