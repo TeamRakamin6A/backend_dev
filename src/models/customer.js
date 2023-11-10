@@ -14,10 +14,22 @@ module.exports = (sequelize, DataTypes) => {
   }
   Customer.init(
     {
-      name: DataTypes.STRING,
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: { notEmpty: true },
+      },
       address: DataTypes.STRING,
-      phone_number: DataTypes.STRING,
-      email: DataTypes.STRING,
+      phone_number: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        validate: { notEmpty: true },
+      },
+      email: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: { notEmpty: true },
+      },
     },
     {
       sequelize,
