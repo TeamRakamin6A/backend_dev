@@ -48,6 +48,61 @@ const addItem = async (req, res, next) => {
     }
 }
 
+// Update Item
+const updateItem = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const {sku, title, price, description, keywords} = req.body;
+
+        const foundItem = await Item.findOne ({
+            where: {
+                id
+            }
+        })
+
+        if(!foundItem) {
+            throw {name: "errorNotFound"}
+        }
+
+        let updateItem = {
+            sku: sku || foundItem.sku,
+            title: title || foundItem.title,
+            price: price || foundItem.price,
+            description: description || foundItem.description,
+            keywords: keywords || foundItem.keywords
+        }
+
+        await foundItem.update(updateItem);
+        res.status(200).json({ status: true, message: "Item Updated Succesfully"});
+    } catch (error) {
+        next(error)
+    }
+}
+
+// Delete Item
+const deleteItem = async (req, res, next) => {
+    try {
+        const { id } = req.params
+
+        const foundItem = await Item.findOne ({
+            where: {
+                id
+            }
+        })
+
+        if(!foundItem) {
+            throw { name: "errorNotFound" }
+        }
+
+        await foundItem.destroy();
+        res.status(200).json({ status: true, message: "Item Deleted Succesfully"});
+    } catch (error) {
+        next (error)
+    }
+}
+
 module.exports = {
-    addItem
+    addItem,
+    updateItem, 
+    deleteItem
 }
