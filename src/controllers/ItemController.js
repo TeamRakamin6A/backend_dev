@@ -1,12 +1,14 @@
 const errorHandler = require("../middlewares/ErrorHandlerMiddlware");
 const { Item, Category, Item_Category, sequelize, DataType } = require("../models");
+const { Op } = require("sequelize");
+
 
 // Create new items
 const addItem = async (req, res, next) => {
     const t = await sequelize.transaction();
     try {
-        const {sku, title, price, type, description, keywords, category_ids} = req.body;
-       
+        const { sku, title, price, type, description, keywords, category_ids } = req.body;
+
         const item = await Item.create({
             sku,
             title,
@@ -14,9 +16,9 @@ const addItem = async (req, res, next) => {
             type,
             description,
             keywords
-        }, {returning: true, transaction: t})
+        }, { returning: true, transaction: t })
 
-        for(let i = 0; i < category_ids.length; i++ ) {
+        for (let i = 0; i < category_ids.length; i++) {
             const categoryID = category_ids[i]
 
             const foundCategory = await Category.findOne({
@@ -26,16 +28,16 @@ const addItem = async (req, res, next) => {
 
             })
 
-            if(!foundCategory) {
+            if (!foundCategory) {
                 throw { name: "errorNotFound" };
             }
 
             await Item_Category.create({
-                item_id: item.id, 
+                item_id: item.id,
                 category_id: foundCategory.id
             }, { transaction: t })
 
-        } 
+        }
 
         await t.commit();
 
@@ -52,9 +54,47 @@ const addItem = async (req, res, next) => {
 // List All Items
 const getItems = async (req, res, next) => {
     try {
-        const items = await Item.findAll();
+        // Pagination :
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const titleFilter = req.query.title || "";
+        const keywordsFilter = req.query.keywords || "";
+        const skuFilter = req.query.sku || "";
+        
+        const offset = (page - 1) * limit;
 
-        res.status(200).json({ data: items })
+        const { count, rows: items } = await Item.findAndCountAll({
+            where: 
+            {
+                title: {
+                    [Op.iLike]: `%${titleFilter}%`
+                },
+                keywords: {
+                    [Op.iLike]: `%${keywordsFilter}%`
+                },
+                sku: {
+                    [Op.iLike]: `%${skuFilter}%`
+                },
+            },
+            offset,
+            limit,
+        });
+
+        const totalPages = Math.ceil(count / limit);
+
+        const nextPage = page < totalPages ? page + 1 : null;
+        const prevPage = page > 1 ? page - 1 : null;
+
+        const paginationInfo = {
+            totalItems: count,
+            totalPages,
+            currentPage: page,
+            nextPage,
+            prevPage,
+            items: items,
+        };
+
+        res.status(200).json({ data: paginationInfo})
     } catch (error) {
         next(error)
     }
@@ -65,7 +105,7 @@ const getItemID = async (req, res, next) => {
     try {
         const { id } = req.params;
 
-        const foundItem = await Item.findOne ({
+        const foundItem = await Item.findOne({
             include: [{
                 model: Category
             }],
@@ -74,43 +114,35 @@ const getItemID = async (req, res, next) => {
             }
 
         })
-        
-        if(!foundItem) {
-            throw {name: "errorNotFound"}
+
+        if (!foundItem) {
+            throw { name: "errorNotFound" }
         }
 
-        await res.status(200).json({ status: true, data: foundItem})
+        await res.status(200).json({ status: true, data: foundItem })
     } catch (error) {
         next(error)
     }
 }
 
-// Get Item: Filter by name
-const filterTitle = async (req, res, next) => {
-    try {
-     
-    } catch (error) {
-        next (error)
-    }
-    
-}
+
 
 // Update Item
 const updateItem = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const {sku, title, price, description, keywords} = req.body;
+        const { sku, title, price, description, keywords } = req.body;
 
-        const foundItem = await Item.findOne ({
+        const foundItem = await Item.findOne({
             where: {
                 id
             }
         })
 
-        if(!foundItem) {
-            throw {name: "errorNotFound"}
+        if (!foundItem) {
+            throw { name: "errorNotFound" }
         }
-        
+
         let updateItem = {
             sku: sku || foundItem.sku,
             title: title || foundItem.title,
@@ -120,7 +152,7 @@ const updateItem = async (req, res, next) => {
         }
 
         await foundItem.update(updateItem);
-        res.status(200).json({ status: true, message: "Item Updated Succesfully"});
+        res.status(200).json({ status: true, message: "Item Updated Succesfully" });
     } catch (error) {
         next(error)
     }
@@ -130,14 +162,14 @@ const updateItem = async (req, res, next) => {
 const uploadImage = async (req, res, next) => {
     try {
         const params = {
-            file: req.file, 
+            file: req.file,
             id: req.params.id
         }
 
-        const {file, id} = params;
+        const { file, id } = params;
 
-        if(!file) {
-            throw {name: "undefined"}
+        if (!file) {
+            throw { name: "undefined" }
         }
 
         const image_url = `http://localhost:3000/uploads/${file.filename}`;
@@ -145,26 +177,26 @@ const uploadImage = async (req, res, next) => {
         const payload = {
             image_url
         }
-        
+
         const foundItem = await Item.findOne({
             where: {
                 id
             }
         })
 
-        if(!foundItem) {
-            throw {name: "errorNotFound"}
+        if (!foundItem) {
+            throw { name: "errorNotFound" }
         }
 
         await foundItem.update(payload)
 
-       res.status(200).json({ status: true, message: "Upload Image Succesfully", data: foundItem});
+        res.status(200).json({ status: true, message: "Upload Image Succesfully", data: foundItem });
 
-       
+
 
 
     } catch (error) {
-        next (error)
+        next(error)
     }
 }
 
@@ -173,29 +205,28 @@ const deleteItem = async (req, res, next) => {
     try {
         const { id } = req.params
 
-        const foundItem = await Item.findOne ({
+        const foundItem = await Item.findOne({
             where: {
                 id
             }
         })
 
-        if(!foundItem) {
+        if (!foundItem) {
             throw { name: "errorNotFound" }
         }
 
         await foundItem.destroy();
-        res.status(200).json({ status: true, message: "Item Deleted Succesfully"});
+        res.status(200).json({ status: true, message: "Item Deleted Succesfully" });
     } catch (error) {
-        next (error)
+        next(error)
     }
 }
 
 module.exports = {
     addItem,
     getItems,
-    filterTitle,
     getItemID,
-    updateItem, 
+    updateItem,
     uploadImage,
     deleteItem
 }
