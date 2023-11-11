@@ -24,8 +24,16 @@ module.exports = (sequelize, DataTypes) => {
   }
   Warehouse.init(
     {
-      title: DataTypes.STRING,
-      address: DataTypes.STRING,
+      title: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: { notEmpty: true },
+      },
+      address: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: { notEmpty: true },
+      },
     },
     {
       sequelize,
