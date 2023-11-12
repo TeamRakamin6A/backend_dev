@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 const { Order, Order_Item } = require("../models");
-=======
-const { Order } = require("../models");
->>>>>>> 512092d (add more code)
 
 const createOrder = async (req, res, next) => {
     try {
@@ -12,11 +8,7 @@ const createOrder = async (req, res, next) => {
             warehouse_id,
             customer_id,
             status,
-<<<<<<< HEAD
             order_item,
-=======
-            order_item_ids,
->>>>>>> 512092d (add more code)
         } = req.body;
 
         const order = await Order.Create({
@@ -26,7 +18,6 @@ const createOrder = async (req, res, next) => {
             customer_id,
             status,
         }, { returning: true });
-<<<<<<< HEAD
 
         for (let i = 0; i < order_item.length; i++) {
             const orderItem = order_item[i];
@@ -44,8 +35,6 @@ const createOrder = async (req, res, next) => {
                 item_id: orderItem.id
             })
         }
-=======
->>>>>>> 512092d (add more code)
     } catch (error) {
         next(error);
     }
