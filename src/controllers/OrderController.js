@@ -1,4 +1,4 @@
-const { Order } = require("../models");
+const { Order, Order_Item } = require("../models");
 
 const createOrder = async (req, res, next) => {
     try {
@@ -8,7 +8,7 @@ const createOrder = async (req, res, next) => {
             warehouse_id,
             customer_id,
             status,
-            order_item_ids,
+            order_item,
         } = req.body;
 
         const order = await Order.Create({
@@ -18,6 +18,23 @@ const createOrder = async (req, res, next) => {
             customer_id,
             status,
         }, { returning: true });
+
+        for (let i = 0; i < order_item.length; i++) {
+            const orderItem = order_item[i];
+
+            console.log(orderItem);
+
+            const foundOrderItem = await Order_Item.findOne({
+                where: { id: orderItem.id }
+            })
+
+            if (!foundOrderItem) throw { name: "errorNotFound" }
+
+            await Order_Item.create({
+                order_id: order.id,
+                item_id: orderItem.id
+            })
+        }
     } catch (error) {
         next(error);
     }
