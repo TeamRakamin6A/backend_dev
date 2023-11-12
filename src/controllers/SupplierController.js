@@ -20,7 +20,7 @@ const getAllSupplier = async (req, res, next) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
-        const company_nameFilter = req.query.company_name || '';
+        const company_nameFilter = req.query.q || '';
 
         const offset = (page - 1) * limit;
 
@@ -89,7 +89,7 @@ const updateSupplier = async (req, res, next) => {
             zip_code: zip_code || supplier.zip_code
         }, { returning: true });
 
-        res.status(200).json({ message: 'Supplier Updated Successfully', data  : supplier});
+        res.status(200).json({ message: 'Supplier Updated Successfully', data: supplier });
     } catch (error) {
         next(error);
     }
