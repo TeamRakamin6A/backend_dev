@@ -3,6 +3,7 @@ const router = express.Router();
 const UserRouter = require("./UserRoute");
 const CustomerRouter = require("./CustomerRoute");
 const UsersController = require("../controllers/UserController");
+const CategoryRouter = require('./CategoryRoute')
 const authMiddleware = require("../middlewares/AuthMiddleware");
 
 router.post("/api/users/login", UsersController.loginUser);
@@ -12,5 +13,6 @@ router.use(authMiddleware);
 
 router.use("/api/users", UserRouter);
 router.use("/api/customers", CustomerRouter);
+router.use("/api/categories", CategoryRouter);
 
 module.exports = router;
