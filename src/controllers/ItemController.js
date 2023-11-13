@@ -57,24 +57,25 @@ const getItems = async (req, res, next) => {
         // Pagination :
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
-        const titleFilter = req.query.title || "";
-        const keywordsFilter = req.query.keywords || "";
-        const skuFilter = req.query.sku || "";
-        
+        const queryFilter = req.query.q || "";
+
         const offset = (page - 1) * limit;
 
         const { count, rows: items } = await Item.findAndCountAll({
+            include: [{
+                model: Category,
+            }],
             where: 
             {
                 title: {
-                    [Op.iLike]: `%${titleFilter}%`
+                    [Op.iLike]: `%${queryFilter}%`
                 },
                 keywords: {
-                    [Op.iLike]: `%${keywordsFilter}%`
+                    [Op.iLike]: `%${queryFilter}%`
                 },
                 sku: {
-                    [Op.iLike]: `%${skuFilter}%`
-                },
+                    [Op.iLike]: `%${queryFilter}%`
+                }
             },
             offset,
             limit,
@@ -169,7 +170,7 @@ const uploadImage = async (req, res, next) => {
         const { file, id } = params;
 
         if (!file) {
-            throw { name: "undefined" }
+            throw { name: "FIleNotExists" }
         }
 
         const image_url = `http://localhost:3000/uploads/${file.filename}`;
