@@ -1,6 +1,8 @@
-const { Order, Order_Item } = require("../models");
+
+const { Order, Order_Item, Item, sequelize } = require("../models");
 
 const createOrder = async (req, res, next) => {
+    const t = await sequelize.transaction()
     try {
         const {
             invoice,
@@ -8,10 +10,10 @@ const createOrder = async (req, res, next) => {
             warehouse_id,
             customer_id,
             status,
-            order_item,
+            item,
         } = req.body;
 
-        const order = await Order.Create({
+        const order = await Order.create({
             invoice,
             total_price,
             warehouse_id,
@@ -19,23 +21,28 @@ const createOrder = async (req, res, next) => {
             status,
         }, { returning: true });
 
-        for (let i = 0; i < order_item.length; i++) {
-            const orderItem = order_item[i];
+        for (let i = 0; i < item.length; i++) {
+            const orderItem = item[i];
 
-            console.log(orderItem);
-
-            const foundOrderItem = await Order_Item.findOne({
+            console.log(orderItem.id);
+            const foundItem = await Item.findOne({
                 where: { id: orderItem.id }
             })
 
-            if (!foundOrderItem) throw { name: "errorNotFound" }
+            if (!foundItem) throw { name: "errorNotFound" }
 
             await Order_Item.create({
                 order_id: order.id,
-                item_id: orderItem.id
-            })
+                item_id: orderItem.id,
+                quantity: orderItem.quantity
+            }, { transaction: t })
         }
+
+        await t.commit()
+
+        res.status(201).json({ data: order })
     } catch (error) {
+        await t.rollback()
         next(error);
     }
 };
