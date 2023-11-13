@@ -3,9 +3,9 @@ const { Op } = require("sequelize");
 
 const addCategory = async (req, res, next) => {
   try {
-    const { item_id, category_id } = req.body;
+    const { title } = req.body;
 
-    await item_category.create({ item_id, category_id });
+    await Category.create({ title });
 
     res
       .status(200)
@@ -56,11 +56,11 @@ const getAllCategory = async (req, res, next) => {
 
 const getCategorybyId = async (req, res, next) => {
   try {
-    const ItemCategory = await ItemCategory.findByPk(req.params.id);
-    if (!ItemCategory) {
+    const category = await Category.findByPk(req.params.id);
+    if (!category) {
       throw { name: "ErrorNotFound" };
     }
-    return res.status(200).json({ data: ItemCategory });
+    return res.status(200).json({ data: category });
   } catch (error) {
     next(error);
   }
@@ -68,10 +68,10 @@ const getCategorybyId = async (req, res, next) => {
 
 const updateCategory = async (req, res, next) => {
   try {
-    const { item_id, category_id } = req.body;
+    const { title } = req.body;
     const { id } = req.params;
 
-    const category = await category.findOne({
+    const category = await Category.findOne({
       where: {
         id,
       },
@@ -81,8 +81,10 @@ const updateCategory = async (req, res, next) => {
       throw { name: "ErrorNotFound" };
     };
 
+    await category.update({title})
+
     res.status(200).json({
-      message: "ItemCategory Updated Successfully",
+      message: "Category Updated Successfully",
       data: category,
     });
   } catch (err) {
@@ -98,7 +100,7 @@ const deleteCategory = async (req, res, next) => {
       throw { name: "ErrorNotFound" };
     }
     await findCategory.destroy();
-    return res.status(200).json({ message: "Detele Successfully" });
+    return res.status(200).json({ message: "Delete Successfully" });
   } catch (err) {
     next(err);
   }
