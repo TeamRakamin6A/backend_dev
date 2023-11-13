@@ -24,6 +24,8 @@ const errorHandler = (err, req, res, next) => {
     res
       .status(400)
       .json({ status: false, message: "Wrong Email or Username and Password" });
+  } else if (err.name === "insufficientQuantity") {
+    res.status(400).json({ status: false, message: "Insufficient quantity of items" });
   } else {
     res.status(500).json({ status: false, message: "Internal Server Error" });
   }
