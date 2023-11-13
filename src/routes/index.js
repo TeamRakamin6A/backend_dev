@@ -4,6 +4,7 @@ const UserRouter = require("./UserRoute");
 const SupplierRouter = require("./SupplierRoute");
 const CustomerRouter = require("./CustomerRoute");
 const UsersController = require("../controllers/UserController");
+const CategoryRouter = require('./CategoryRoute')
 const WarehouseRouter = require("./WarehouseRoute");
 const authMiddleware = require("../middlewares/AuthMiddleware");
 
@@ -14,6 +15,7 @@ router.use(authMiddleware);
 
 router.use("/api/users", UserRouter);
 router.use("/api/customers", CustomerRouter);
+router.use("/api/categories", CategoryRouter);
 router.use("/api/suppliers", SupplierRouter);
 router.use("/api/warehouses", WarehouseRouter);
 
