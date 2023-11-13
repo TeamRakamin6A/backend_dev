@@ -18,11 +18,12 @@ const errorHandler = (err, req, res, next) => {
   } else if (err.name === "SequelizeValidationError") {
     let messages = err.errors.map((currentError) => currentError.message)
     res.status(404).json({ status: false, message: messages });
-  }
-  else if (err.name === "InvalidCredentials") {
+  } else if (err.name === "InvalidCredentials") {
     res
       .status(400)
       .json({ status: false, message: "Wrong Email or Username and Password" });
+  } else if (err.name === "insufficientQuantity") {
+    res.status(400).json({ status: false, message: "Insufficient quantity of items" });
   } else {
     res.status(500).json({ status: false, message: "Internal Server Error" });
   }

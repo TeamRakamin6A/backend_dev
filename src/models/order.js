@@ -30,8 +30,16 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         validate: { notEmpty: true },
       },
-      customer_id: DataTypes.INTEGER,
-      warehouse_id: DataTypes.INTEGER,
+      customer_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        validate: { notEmpty: true },
+      },
+      warehouse_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        validate: { notEmpty: true },
+      },
       status: {
         type: DataTypes.STRING,
         allowNull: false,
