@@ -65,18 +65,20 @@ const getItems = async (req, res, next) => {
             include: [{
                 model: Category,
             }],
-            where: 
-            {
-                title: {
-                    [Op.iLike]: `%${queryFilter}%`
-                },
-                keywords: {
-                    [Op.iLike]: `%${queryFilter}%`
-                },
-                sku: {
-                    [Op.iLike]: `%${queryFilter}%`
+            where: {
+                [Op.or]: {
+                    title: {
+                        [Op.iLike]: `%${queryFilter}%`
+                    },
+                    keywords: {
+                        [Op.iLike]: `%${queryFilter}%`
+                    },
+                    sku: {
+                        [Op.iLike]: `%${queryFilter}%`
+                    }
                 }
             },
+            subQuery: false,
             offset,
             limit,
         });
@@ -170,10 +172,10 @@ const uploadImage = async (req, res, next) => {
         const { file, id } = params;
 
         if (!file) {
-            throw { name: "FIleNotExists" }
+            throw { name: "FileNotExists" }
         }
 
-        const image_url = `http://localhost:3000/uploads/${file.filename}`;
+        const image_url = `${process.env.UPLOADPATH}${file.filename}`;
 
         const payload = {
             image_url

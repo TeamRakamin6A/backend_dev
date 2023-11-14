@@ -24,7 +24,7 @@ const errorHandler = (err, req, res, next) => {
     res
       .status(400)
       .json({ status: false, message: "Wrong Email or Username and Password" });
-  } else if (err.name === "FIleNotExists") { 
+  } else if (err.name === "FileNotExists") { 
     res.status(500).json({status: false, message: "File Required!"})
   } 
   else {
