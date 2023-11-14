@@ -18,7 +18,7 @@ module.exports = {
           company_name: "StockSync Solutions",
           address: "Sunrise Garden Surya Mandala I,Jakarta Barat",
           email: "stock.solutions.@stocksync.net",
-          zip_code: "",
+          zip_code: "90544",
           createdAt: new Date(),
           updatedAt: new Date(),
         },
