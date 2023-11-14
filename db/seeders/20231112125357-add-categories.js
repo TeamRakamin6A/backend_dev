@@ -3,33 +3,33 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-    await queryInterface.bulkInsert("Categories", [
+   return await queryInterface.bulkInsert("Categories", [
       {
-        id: "101",
+        id: 1,
         title: "Elektronik",
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
-        id: "102",
+        id: 2,
         title: "Peralatan Dapur",
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
-        id: "103",
+        id: 3,
         title: "Pakaian",
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
-        id: "104",
+        id: 4,
         title: "Furnitur",
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
-        id: "105",
+        id: 5,
         title: "Peralatan Medis",
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -38,7 +38,7 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-    await queryInterface.bulkDelete('Categories', null, {});
+   return await queryInterface.bulkDelete('Categories', null, {});
   
   }
 };

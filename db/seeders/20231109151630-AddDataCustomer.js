@@ -3,10 +3,11 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.bulkInsert(
+   return await queryInterface.bulkInsert(
       "Customers",
       [
         {
+          id: 1,
           name: "Maulana Rafinda",
           address: "Indonesia",
           phone_number: "01234567",
@@ -15,6 +16,7 @@ module.exports = {
           updatedAt: new Date(),
         },
         {
+          id: 2,
           name: "Agustinus Surya Adi Sulistyo Soemarno",
           address: "Indonesia",
           phone_number: "11111111",
@@ -23,6 +25,7 @@ module.exports = {
           updatedAt: new Date(),
         },
         {
+          id: 3,
           name: "Andi Ariski",
           address: "Indonesia",
           phone_number: "22222222",
@@ -31,6 +34,7 @@ module.exports = {
           updatedAt: new Date(),
         },
         {
+          id: 4,
           name: "Rangga Krisna Putra",
           address: "Indonesia",
           phone_number: "33333333",
@@ -39,6 +43,7 @@ module.exports = {
           updatedAt: new Date(),
         },
         {
+          id: 5,
           name: "Reygan Fadhilah",
           address: "Indonesia",
           phone_number: "44444444",
@@ -47,6 +52,7 @@ module.exports = {
           updatedAt: new Date(),
         },
         {
+          id: 6,
           name: "Ahmad Jalu Fahreza Nur Hakim",
           address: "Indonesia",
           phone_number: "55555555",
@@ -60,7 +66,7 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.bulkDelete("Customers", null, {});
+   return await queryInterface.bulkDelete("Customers", null, {});
     /**
      * Add commands to revert seed here.
      *
