@@ -135,6 +135,10 @@ const getItemID = async (req, res, next) => {
             }
         })
 
+        if(!foundWarehouse) {
+            throw { name: "errorNotFound"}
+        }
+
         if (!foundItem) {
             throw { name: "errorNotFound" }
         }
