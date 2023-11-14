@@ -25,6 +25,8 @@ const createOrder = async (req, res, next) => {
             { returning: true, transaction: t }
         );
 
+        let totalPrice = 0
+
         for (let i = 0; i < items.length; i++) {
             const orderItem = items[i];
 
@@ -62,10 +64,7 @@ const createOrder = async (req, res, next) => {
             );
 
 
-            await order.increment("total_price", {
-                by: +orderItem.price_item * data.quantity,
-                transaction: t,
-            });
+            totalPrice += +orderItem.price_item * data.quantity
 
             await foundStock.decrement("quantity", {
                 by: data.quantity,
@@ -73,6 +72,8 @@ const createOrder = async (req, res, next) => {
             });
         }
 
+        order.total_price = totalPrice
+        await order.save({ transaction: t })
         await t.commit();
 
         res.status(201).json({
@@ -124,8 +125,6 @@ const getAllOrder = async (req, res, next) => {
             };
         }
 
-        console.log(req.query, "<<<<<<<<<<<<<<<<<");
-        console.log(optionFilter, "<<<<<<<<<<<<<<<<<");
         const { count, rows } = await Order.findAndCountAll({
             ...optionFilter,
             where: {
