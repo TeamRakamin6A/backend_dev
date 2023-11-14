@@ -10,7 +10,6 @@ const createSupplyOrder = async (req, res, next) => {
         const { id, invoice, total_price, supplier_id, warehouse_id, status, items} = req.body;
 
         const supplyOrder = await Supply_Order.create({
-            id,
             invoice,
             total_price,
             supplier_id,
@@ -46,27 +45,20 @@ const createSupplyOrder = async (req, res, next) => {
                 throw { name: "itemPriceIncorect" };
             }
 
-            const processData = ({
+            const data = await Supply_Item.create({
                 supply_order_id: supplyOrder.id,
                 item_id: foundItem.id,
                 price: supplyOrder.total_price,
                 quantity: supplyItem.quantity
             })
-
-            await Supply_Item.create({
-                supply_order_id: processData.supply_order_id,
-                item_id: foundItem.id,
-                price: processData.price,
-                quantity: processData.quantity
-            })
             
             await supplyOrder.increment("total_price", {
-                by: +supplyItem.price_item * processData.quantity,
+                by: +supplyItem.price_item * data.quantity,
                 transaction: t,
             });
             
             await getStock.increment("quantity", {
-                by: processData.quantity,
+                by: data.quantity,
                 transaction: t,
             });
 
