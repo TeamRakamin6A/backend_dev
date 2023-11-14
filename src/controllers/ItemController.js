@@ -128,13 +128,12 @@ const getItemID = async (req, res, next) => {
     }
 }
 
-
-
 // Update Item
 const updateItem = async (req, res, next) => {
+    const t = await sequelize.transaction();
     try {
         const { id } = req.params;
-        const { sku, title, price, description, keywords } = req.body;
+        const { sku, title, price, description, keywords, category_ids } = req.body;
 
         const foundItem = await Item.findOne({
             where: {
@@ -146,21 +145,40 @@ const updateItem = async (req, res, next) => {
             throw { name: "errorNotFound" }
         }
 
-        let updateItem = {
+        let updateItem = ({
             sku: sku || foundItem.sku,
             title: title || foundItem.title,
             price: price || foundItem.price,
             description: description || foundItem.description,
             keywords: keywords || foundItem.keywords
+        }, { returning: true, transaction: t })
+
+        for (let i = 0; i < category_ids.length; i++) {
+            const categoryID = category_ids[i]
+
+            const foundCategory = await Category.findOne({
+                where: {
+                    id: +categoryID
+                }
+            })
+
+            if (!foundCategory) {
+                throw { name: "errorNotFound" };
+            }
+
+            await Item_Category.create({
+                item_id: foundItem.id,
+                category_id: foundCategory.id
+            }, { transaction: t })
         }
 
+        await t.commit();
         await foundItem.update(updateItem);
         res.status(200).json({ status: true, message: "Item Updated Succesfully" });
     } catch (error) {
         next(error)
     }
 }
-
 // Upload Image 
 const uploadImage = async (req, res, next) => {
     try {
