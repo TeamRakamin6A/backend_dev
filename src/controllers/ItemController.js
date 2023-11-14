@@ -58,13 +58,22 @@ const getItems = async (req, res, next) => {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
         const queryFilter = req.query.q || "";
+        const { category } = req.query;
+        const optionFilter = {};
 
         const offset = (page - 1) * limit;
 
-        const { count, rows: items } = await Item.findAndCountAll({
-            include: [{
+        if (category) {
+            optionFilter.include = {
                 model: Category,
-            }],
+                where: {
+                    title: { [Op.iLike]: `%${category}%` }
+                },
+            }
+        }
+
+        const { count, rows: items } = await Item.findAndCountAll({
+            ...optionFilter,
             where: {
                 [Op.or]: {
                     title: {
