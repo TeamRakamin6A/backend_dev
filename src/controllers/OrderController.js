@@ -14,23 +14,16 @@ const createOrder = async (req, res, next) => {
     try {
         const { invoice, warehouse_id, customer_id, status, items } = req.body;
 
-        let existingOrder = await Order.findOne({
-            where: { warehouse_id, customer_id },
-            transaction: t
-        });
-
-        if (!existingOrder) {
-            existingOrder = await Order.create(
-                {
-                    invoice,
-                    total_price: 0,
-                    warehouse_id,
-                    customer_id,
-                    status,
-                },
-                { returning: true, transaction: t }
-            );
-        }
+        const order = await Order.create(
+            {
+                invoice,
+                total_price: 0,
+                warehouse_id,
+                customer_id,
+                status,
+            },
+            { returning: true, transaction: t }
+        );
 
         for (let i = 0; i < items.length; i++) {
             const orderItem = items[i];
@@ -61,7 +54,7 @@ const createOrder = async (req, res, next) => {
 
             const data = await Order_Item.create(
                 {
-                    order_id: existingOrder.id,
+                    order_id: order.id,
                     item_id: foundItem.id,
                     quantity: orderItem.quantity,
                 },
@@ -69,7 +62,7 @@ const createOrder = async (req, res, next) => {
             );
 
 
-            await existingOrder.increment("total_price", {
+            await order.increment("total_price", {
                 by: +orderItem.price_item * data.quantity,
                 transaction: t,
             });
@@ -85,7 +78,7 @@ const createOrder = async (req, res, next) => {
         res.status(201).json({
             success: true,
             message: "Order and Order Items Created successfully",
-            data: existingOrder,
+            data: order,
         });
     } catch (error) {
         await t.rollback();
@@ -187,8 +180,23 @@ const getOrderById = async (req, res, next) => {
     }
 };
 
-const updateOrder = (req, res, next) => {
+const updateOrder = async (req, res, next) => {
     try {
+        const { q } = req.query || ""
+        const { status } = req.body
+
+        const foundOrder = await Order.findOne({ where: { status: q } })
+        if (!foundOrder) {
+            throw { name: "errorNotFound" }
+        }
+
+        const data = await foundOrder.update({ status, })
+
+        res.status(200).json({
+            status: true,
+            message: "Order Successfully Updated",
+            data
+        })
     } catch (error) {
         next(error);
     }
