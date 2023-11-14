@@ -1,5 +1,5 @@
 const errorHandler = require("../middlewares/ErrorHandlerMiddlware");
-const { Item, Category, Item_Category, sequelize, DataType } = require("../models");
+const { Item, Category, Item_Category, Item_Warehouse, Warehouse, sequelize, DataType } = require("../models");
 const { Op } = require("sequelize");
 
 
@@ -124,14 +124,22 @@ const getItemID = async (req, res, next) => {
             where: {
                 id
             }
+        })
 
+        const foundWarehouse = await Item.findOne({
+            include: [{
+                model: Warehouse
+            }],
+            where: {
+                id
+            }
         })
 
         if (!foundItem) {
             throw { name: "errorNotFound" }
         }
 
-        await res.status(200).json({ status: true, data: foundItem })
+        await res.status(200).json({ status: true, data_item: foundItem, data_warehouse: foundWarehouse})
     } catch (error) {
         next(error)
     }
