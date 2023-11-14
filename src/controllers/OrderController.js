@@ -14,16 +14,23 @@ const createOrder = async (req, res, next) => {
     try {
         const { invoice, warehouse_id, customer_id, status, items } = req.body;
 
-        const order = await Order.create(
-            {
-                invoice,
-                total_price: 0,
-                warehouse_id,
-                customer_id,
-                status,
-            },
-            { returning: true, transaction: t }
-        );
+        let existingOrder = await Order.findOne({
+            where: { warehouse_id, customer_id },
+            transaction: t
+        });
+
+        if (!existingOrder) {
+            existingOrder = await Order.create(
+                {
+                    invoice,
+                    total_price: 0,
+                    warehouse_id,
+                    customer_id,
+                    status,
+                },
+                { returning: true, transaction: t }
+            );
+        }
 
         for (let i = 0; i < items.length; i++) {
             const orderItem = items[i];
@@ -54,21 +61,18 @@ const createOrder = async (req, res, next) => {
 
             const data = await Order_Item.create(
                 {
-                    order_id: order.id,
+                    order_id: existingOrder.id,
                     item_id: foundItem.id,
                     quantity: orderItem.quantity,
                 },
                 { transaction: t }
             );
-            console.log("Order Item Price:", orderItem.price_item);
-            console.log("Data Quantity:", data.quantity);
 
-            await order.update(
-                {
-                    total_price: +orderItem.price_item * data.quantity,
-                },
-                { transaction: t }
-            );
+
+            await existingOrder.increment("total_price", {
+                by: +orderItem.price_item * data.quantity,
+                transaction: t,
+            });
 
             await foundStock.decrement("quantity", {
                 by: data.quantity,
@@ -81,7 +85,7 @@ const createOrder = async (req, res, next) => {
         res.status(201).json({
             success: true,
             message: "Order and Order Items Created successfully",
-            data: order,
+            data: existingOrder,
         });
     } catch (error) {
         await t.rollback();
@@ -177,7 +181,7 @@ const getOrderById = async (req, res, next) => {
             throw { name: "errorNotFound" };
         }
 
-        res.status(200).json({ status: true, foundOrder })
+        res.status(200).json({ status: true, data: foundOrder })
     } catch (error) {
         next(error);
     }
@@ -201,6 +205,7 @@ const deleteOrder = async (req, res, next) => {
 
         await foundOrder.destroy()
 
+        res.status(200).json({ status: true, message: "Order Deleted Successfully" })
     } catch (error) {
         next(error);
     }
