@@ -2,10 +2,13 @@
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up (queryInterface, Sequelize) {'Orders'
+  async up (queryInterface, Sequelize) {
+  return await queryInterface.bulkInsert('Orders',
+   
    [
     {
-      invoice: 'INV123456',
+      id: 1,
+      invoice: 'INV-001',
       total_price: 500,
       customer_id: 1,
       warehouse_id: 1,
@@ -13,7 +16,8 @@ module.exports = {
       createdAt: new Date(),
       updatedAt: new Date(),
    },{
-    invoice: 'INV789012',
+    id: 2,
+    invoice: 'INV-002',
     total_price: 700,
     customer_id: 2,
     warehouse_id: 2,
@@ -21,7 +25,8 @@ module.exports = {
     createdAt: new Date(),
     updatedAt: new Date(),
    },{
-    invoice: 'INV345678',
+    id: 3,
+    invoice: 'INV-003',
     total_price: 300,
     customer_id: 3,
     warehouse_id: 1,
@@ -29,7 +34,8 @@ module.exports = {
     createdAt: new Date(),
     updatedAt: new Date(),
    },{
-    invoice: 'INV901234',
+    id: 4,
+    invoice: 'INV-004',
     total_price: 450,
     customer_id: 4,
     warehouse_id: 3,
@@ -37,7 +43,8 @@ module.exports = {
     createdAt: new Date(),
     updatedAt: new Date(),
    },{
-    invoice: 'INV567890',
+    id: 5,
+    invoice: 'INV-005',
     total_price: 600,
     customer_id: 5,
     warehouse_id: 2,
@@ -45,7 +52,8 @@ module.exports = {
     createdAt: new Date(),
     updatedAt: new Date(),
    },{
-    invoice: 'INV123789',
+    id: 6,
+    invoice: 'INV-006',
         total_price: 350,
         customer_id: 6,
         warehouse_id: 1,
@@ -53,7 +61,7 @@ module.exports = {
         createdAt: new Date(),
         updatedAt: new Date(),
    }]
-  },
+  )},
 
   async down (queryInterface, Sequelize) {
     return await queryInterface.bulkDelete('Orders', null, {});
