@@ -91,45 +91,52 @@ const getAllOrder = async (req, res, next) => {
     try {
         const page = +req.query.page || 1;
         const limit = +req.query.limit || 10;
-        const { q, customer, sku, warehouse } = req.query;
+        const { q, status } = req.query;
         const offset = limit * (page - 1);
-        let optionFilter = {};
-
-        if (customer) {
-            optionFilter.include = {
-                model: Customer,
-                where: {
-                    name: { [Op.iLike]: `%${customer}%` },
+        let optionFilter = {
+            include: [
+                {
+                    model: Warehouse
                 },
-            };
-        }
+                {
+                    model: Customer
+                },
+                {
+                    model: Item
+                }
+            ]
+        };
 
-        if (sku) {
-            optionFilter.include = {
-                model: Order_Item,
-                include: {
-                    model: Item,
-                    where: {
-                        sku: { [Op.iLike]: `%${sku}%` },
+
+        if (q) {
+            optionFilter.where = {
+                [Op.or]: [
+                    {
+                        "$Warehouse.title$": {
+                            [Op.iLike]: `%${q}%`
+                        }
                     },
-                },
-            };
+                    {
+                        "$Customer.name$": {
+                            [Op.iLike]: `%${q}%`
+                        }
+                    },
+                    {
+                        "$Items.sku$": {
+                            [Op.iLike]: `%${q}%`
+                        }
+                    }
+                ]
+            }
         }
 
-        if (warehouse) {
-            optionFilter.include = {
-                model: Warehouse,
-                where: {
-                    title: { [Op.iLike]: `%${warehouse}%` },
-                },
-            };
+        if (status) {
+            optionFilter.where.status = status
         }
 
         const { count, rows } = await Order.findAndCountAll({
             ...optionFilter,
-            where: {
-                status: { [Op.iLike]: `%${q || ""}%` },
-            },
+            subQuery: false,
             offset,
             limit,
         });
@@ -138,7 +145,6 @@ const getAllOrder = async (req, res, next) => {
         const nextPage = page < totalPage ? page + 1 : null;
         const prevPage = page > 1 ? page - 1 : null;
 
-        if (rows.length === 0) throw { name: "errorNotFound" };
 
         res.status(200).json({
             success: true,
@@ -160,7 +166,7 @@ const getOrderById = async (req, res, next) => {
 
         const foundOrder = await Order.findOne({
             include: [{
-                model: Order_Item
+                model: Item
             }, {
                 model: Customer
             }, {
@@ -181,15 +187,16 @@ const getOrderById = async (req, res, next) => {
 
 const updateOrder = async (req, res, next) => {
     try {
-        const { q } = req.query || ""
+
+        const { id } = req.params;
         const { status } = req.body
 
-        const foundOrder = await Order.findOne({ where: { status: q } })
+        const foundOrder = await Order.findOne({ where: { id } })
         if (!foundOrder) {
             throw { name: "errorNotFound" }
         }
 
-        const data = await foundOrder.update({ status, })
+        const data = await foundOrder.update({ status })
 
         res.status(200).json({
             status: true,
