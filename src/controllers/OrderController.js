@@ -1,11 +1,18 @@
 const { Op, where } = require("sequelize");
-const { Order, Order_Item, Warehouse, Item_Warehouse, Customer, Item, sequelize } = require("../models");
+const {
+    Order,
+    Order_Item,
+    Warehouse,
+    Item_Warehouse,
+    Customer,
+    Item,
+    sequelize,
+} = require("../models");
 
 const createOrder = async (req, res, next) => {
     const t = await sequelize.transaction();
     try {
-        const { invoice, warehouse_id, customer_id, status, items } =
-            req.body;
+        const { invoice, warehouse_id, customer_id, status, items } = req.body;
 
         const order = await Order.create(
             {
@@ -15,7 +22,7 @@ const createOrder = async (req, res, next) => {
                 customer_id,
                 status,
             },
-            { returning: true }
+            { returning: true, transaction: t }
         );
 
         for (let i = 0; i < items.length; i++) {
@@ -29,19 +36,21 @@ const createOrder = async (req, res, next) => {
             const foundStock = await Item_Warehouse.findOne({
                 where: {
                     item_id: orderItem.id,
-                    warehouse_id
-                }
-            })
+                    warehouse_id,
+                },
+            });
 
             if (!foundStock) {
-                throw { name: "errorNotFound" }
+                throw { name: "errorNotFound" };
             }
 
             if (foundStock.quantity < orderItem.quantity) {
-                await t.rollback()
-                throw { name: "insufficientquantity" }
+                throw { name: "insufficientQuantity" };
             }
 
+            if (foundItem.price !== orderItem.price_item) {
+                throw { name: "itemPriceIncorect" };
+            }
 
             const data = await Order_Item.create(
                 {
@@ -51,12 +60,20 @@ const createOrder = async (req, res, next) => {
                 },
                 { transaction: t }
             );
-            console.log('Order Item Price:', orderItem.price_item);
-            console.log('Data Quantity:', data.quantity);
+            console.log("Order Item Price:", orderItem.price_item);
+            console.log("Data Quantity:", data.quantity);
 
-            await order.update({
-                total_price: +orderItem.price_item * data.quantity
-            }, { transaction: t })
+            await order.update(
+                {
+                    total_price: +orderItem.price_item * data.quantity,
+                },
+                { transaction: t }
+            );
+
+            await foundStock.decrement("quantity", {
+                by: data.quantity,
+                transaction: t,
+            });
         }
 
         await t.commit();
@@ -121,9 +138,9 @@ const getAllOrder = async (req, res, next) => {
             limit,
         });
 
-        const totalPage = Math.ceil(count / limit)
-        const nextPage = page < totalPage ? page + 1 : null
-        const prevPage = page > 1 ? page - 1 : null
+        const totalPage = Math.ceil(count / limit);
+        const nextPage = page < totalPage ? page + 1 : null;
+        const prevPage = page > 1 ? page - 1 : null;
 
         if (rows.length === 0) throw { name: "errorNotFound" };
 
@@ -141,8 +158,26 @@ const getAllOrder = async (req, res, next) => {
     }
 };
 
-const getOrderById = (req, res, next) => {
+const getOrderById = async (req, res, next) => {
     try {
+        const { id } = req.params;
+
+        const foundOrder = await Order.findOne({
+            include: [{
+                model: Order_Item
+            }, {
+                model: Customer
+            }, {
+                model: Warehouse
+            }],
+            where: { id }
+        });
+
+        if (!foundOrder) {
+            throw { name: "errorNotFound" };
+        }
+
+        res.status(200).json({ status: true, foundOrder })
     } catch (error) {
         next(error);
     }
@@ -155,8 +190,17 @@ const updateOrder = (req, res, next) => {
     }
 };
 
-const deleteOrder = (req, res, next) => {
+const deleteOrder = async (req, res, next) => {
     try {
+        const { id } = req.params
+
+        const foundOrder = await Order.findOne({ where: { id } })
+        if (!foundOrder) {
+            throw { name: "errorNotFound" };
+        }
+
+        await foundOrder.destroy()
+
     } catch (error) {
         next(error);
     }
