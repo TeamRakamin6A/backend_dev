@@ -57,36 +57,57 @@ const getItems = async (req, res, next) => {
         // Pagination :
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
-        const queryFilter = req.query.q || "";
-        const { category } = req.query;
-        const optionFilter = {};
+        const q = req.query.q || "";
+        let category_ids = req.query.category_ids
+        let optionFilter = {
+            where: {
+                [Op.or]: []
+            }
+        };
 
         const offset = (page - 1) * limit;
 
-        if (category) {
-            optionFilter.include = {
-                model: Category,
-                where: {
-                    title: { [Op.iLike]: `%${category}%` }
-                },
+        if (q) {
+
+            let filterTitle = {
+                title: {
+                    [Op.iLike]: `%${q}%`
+                }
             }
+
+            let filterKeywords = {
+                keywords: {
+                    [Op.iLike]: `%${q}%`
+                }
+            }
+
+            let filterSKU = {
+                sku: {
+                    [Op.iLike]: `%${q}%`
+                }
+            }
+
+            optionFilter.where[Op.or].push(filterTitle, filterKeywords, filterSKU)
         }
 
-        const { count, rows: items } = await Item.findAndCountAll({
-            ...optionFilter,
-            where: {
-                [Op.or]: {
-                    title: {
-                        [Op.iLike]: `%${queryFilter}%`
-                    },
-                    keywords: {
-                        [Op.iLike]: `%${queryFilter}%`
-                    },
-                    sku: {
-                        [Op.iLike]: `%${queryFilter}%`
-                    }
+
+
+        if (category_ids) {
+            category_ids = category_ids.map((cat_id) => +cat_id)
+
+            optionFilter.where[Op.or].push({
+                '$Categories.id$': {
+                    [Op.in]: category_ids
                 }
-            },
+            })
+        }
+
+
+        const { count, rows: items } = await Item.findAndCountAll({
+            include: [{
+                model: Category
+            }],
+            ...optionFilter,
             subQuery: false,
             offset,
             limit,
@@ -106,7 +127,7 @@ const getItems = async (req, res, next) => {
             items: items,
         };
 
-        res.status(200).json({ data: paginationInfo})
+        res.status(200).json({ data: paginationInfo })
     } catch (error) {
         next(error)
     }
@@ -135,15 +156,15 @@ const getItemID = async (req, res, next) => {
             }
         })
 
-        if(!foundWarehouse) {
-            throw { name: "errorNotFound"}
+        if (!foundWarehouse) {
+            throw { name: "errorNotFound" }
         }
 
         if (!foundItem) {
             throw { name: "errorNotFound" }
         }
 
-        await res.status(200).json({ status: true, data_item: foundItem, data_warehouse: foundWarehouse})
+        await res.status(200).json({ status: true, data_item: foundItem, data_warehouse: foundWarehouse })
     } catch (error) {
         next(error)
     }
