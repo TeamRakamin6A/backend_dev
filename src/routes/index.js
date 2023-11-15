@@ -7,6 +7,7 @@ const OrderRouter = require("./OrderRoute");
 const UsersController = require("../controllers/UserController");
 const CategoryRouter = require('./CategoryRoute')
 const WarehouseRouter = require("./WarehouseRoute");
+const DashboardRouter = require("./DashboardRoute")
 const authMiddleware = require("../middlewares/AuthMiddleware");
 
 router.post("/api/users/login", UsersController.loginUser);
@@ -20,5 +21,6 @@ router.use("/api/categories", CategoryRouter);
 router.use("/api/suppliers", SupplierRouter);
 router.use("/api/warehouses", WarehouseRouter);
 router.use("/api/orders", OrderRouter);
+router.use("/api/dashboards", DashboardRouter);
 
 module.exports = router;
