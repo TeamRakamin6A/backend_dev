@@ -28,7 +28,10 @@ const errorHandler = (err, req, res, next) => {
     res.status(400).json({ status: false, message: "Insufficient quantity of items" });
   } else if (err.name === "itemPriceIncorect") {
     res.status(400).json({ status: false, message: "Item price input is incorrect" });
-  } else {
+  } else if (err.name === "FIleNotExists") {
+    res.status(500).json({ status: false, message: "File Required!" })
+  }
+  else {
     res.status(500).json({ status: false, message: "Internal Server Error" });
   }
 };
