@@ -30,17 +30,20 @@ const createSupplyOrder = async (req, res, next) => {
 
             const getStock = await Item_Warehouse.findOne({
                 where: {
-                    item_id: supplyItem.id,
+                    item_id: foundItem.id,
                     warehouse_id
                 },
             })
+
+            console.log(supplyOrder, "<<<<<");
             
             let data = await Supply_Item.create({
                 item_id: foundItem.id,
-                supply_order_id: Supply_Order.id,
+                supply_order_id: supplyOrder.id,
                 quantity: supplyItem.quantity,
                 price: foundItem.price
-            })
+            }, {transaction: t})
+
             if (!getStock) {
                 throw { name: "errorNotFound" };
             }
@@ -90,8 +93,10 @@ const getSupplyOrder = async (req, res, next) => {
         const limit = +req.query.limit || 10;
         const queryFilter = req.query.q || "";
         const offset = limit * (page - 1);
+        const status = req.query.status;
 
         let optionFilter = {
+            where: {},
             include: [
                 {
                     model: Warehouse
@@ -126,10 +131,17 @@ const getSupplyOrder = async (req, res, next) => {
                 ]
             }
         }
+        
+        if(status) {
+            optionFilter.where.status = {
+                [Op.iLike]: `%${status}%`
+            }
+        }
 
         const { count, rows } = await Supply_Order.findAndCountAll({
             ...optionFilter,
             subQuery: false,
+            distinct: true,
             offset,
             limit,
         });
