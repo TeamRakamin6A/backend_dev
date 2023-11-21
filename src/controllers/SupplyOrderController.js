@@ -1,5 +1,6 @@
 const { Op, where } = require("sequelize");
-const { Item, Supplier, Warehouse, Item_Warehouse, Supply_Order, Supply_Item, sequelize } = require("../models")
+const { Item, Supplier, Warehouse, Item_Warehouse, Supply_Order, Supply_Item, sequelize } = require("../models");
+const { get } = require("../routes/SupplyOrderRoute");
 
 
 // Create Supply Order
@@ -25,22 +26,17 @@ const createSupplyOrder = async (req, res, next) => {
             console.log(supplyItem);
 
             const foundItem = await Item.findOne({
-                where: { id: supplyItem.id }
+                where: {
+                    id: supplyItem.id
+                }
             })
 
             const getStock = await Item_Warehouse.findOne({
                 where: {
-                    item_id: supplyItem.id,
                     warehouse_id
                 },
             })
             
-            let data = await Supply_Item.create({
-                item_id: foundItem.id,
-                supply_order_id: Supply_Order.id,
-                quantity: supplyItem.quantity,
-                price: foundItem.price
-            })
             if (!getStock) {
                 throw { name: "errorNotFound" };
             }
@@ -54,6 +50,14 @@ const createSupplyOrder = async (req, res, next) => {
                 transaction: t,
             });
 
+            const data = await Supply_Item.create({
+                item_id: foundItem.id,
+                supply_order_id: Supply_Order.id,
+                quantity: supplyItem.quantity,
+                price: foundItem.price
+            })
+
+
             totalPrice += +supplyItem.price_item * data.quantity
 
 
@@ -64,8 +68,6 @@ const createSupplyOrder = async (req, res, next) => {
 
 
             supplyOrder.total_price = totalPrice
-
-            
             await supplyOrder.save ({ transaction: t })
             await t.commit();
 
@@ -90,6 +92,7 @@ const getSupplyOrder = async (req, res, next) => {
         const limit = +req.query.limit || 10;
         const queryFilter = req.query.q || "";
         const offset = limit * (page - 1);
+        const status = req.body;
 
         let optionFilter = {
             include: [
@@ -125,6 +128,10 @@ const getSupplyOrder = async (req, res, next) => {
                     }
                 ]
             }
+        }
+
+        if (status) {
+            optionFilter.where.status = status
         }
 
         const { count, rows } = await Supply_Order.findAndCountAll({
