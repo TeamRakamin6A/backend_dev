@@ -94,9 +94,10 @@ const getSupplyOrder = async (req, res, next) => {
         const limit = +req.query.limit || 10;
         const queryFilter = req.query.q || "";
         const offset = limit * (page - 1);
-        const status = req.body;
+        const status = req.query.status;
 
         let optionFilter = {
+            where: {},
             include: [
                 {
                     model: Warehouse
@@ -132,13 +133,16 @@ const getSupplyOrder = async (req, res, next) => {
             }
         }
 
-        if (status) {
-            optionFilter.where.status = status
+        if(status) {
+            optionFilter.where.status = {
+                [Op.iLike]: `%${status}%`
+            }
         }
 
         const { count, rows } = await Supply_Order.findAndCountAll({
             ...optionFilter,
             subQuery: false,
+            distinct: true,
             offset,
             limit,
         });
