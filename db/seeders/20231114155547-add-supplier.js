@@ -14,7 +14,7 @@ module.exports = {
     */
     return await queryInterface.bulkInsert('Suppliers', [
       {
-        id: 1,
+        id: 9991,
         company_name: "A Company",
         zip_code: 3722,
         email: "acompany@mail.com",
@@ -23,7 +23,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        id: 2,
+        id: 9992,
         company_name: "B Company",
         zip_code: 3722,
         email: "bcompany@mail.com",
@@ -32,7 +32,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        id: 3,
+        id: 9993,
         company_name: "C Company",
         zip_code: 3722,
         email: "ccompany@mail.com",
@@ -41,7 +41,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        id: 4,
+        id: 9994,
         company_name: "D Company",
         zip_code: 3722,
         email: "dcompany@mail.com",
@@ -50,7 +50,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        id: 5,
+        id: 9995,
         company_name: "E Company",
         zip_code: 3722,
         email: "ecompany@mail.com",

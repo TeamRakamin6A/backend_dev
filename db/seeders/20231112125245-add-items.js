@@ -5,7 +5,7 @@ module.exports = {
   async up(queryInterface, Sequelize) {
     return await queryInterface.bulkInsert("Items", [
       {
-        id: 1,
+        id: 9991,
         sku: "001",
         title: "lenovo ideapad slim 3",
         price: 9199000,
@@ -16,7 +16,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        id: 2,
+        id: 9992,
         sku: "002",
         title: "lenovo l24i",
         price: 15409000,
@@ -27,7 +27,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        id: 3,
+        id: 9993,
         sku: "003",
         title: "canon eos 90d",
         price: 32400000,
@@ -38,7 +38,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        id: 4,
+        id: 9994,
         sku: "004",
         title: "ifa cookware ichef square",
         price: 310000,
@@ -49,7 +49,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        id: 5,
+        id: 9995,
         sku: "005",
         title: "Staub - Silicone Utensils",
         price: 640000,
@@ -60,7 +60,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        id: 6,
+        id: 9996,
         sku: "006",
         title: "KITCHEN AID SMALL APPLIANCES ACC WHITE",
         price: 3248000,
@@ -71,7 +71,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        id: 7,
+        id: 9997,
         sku: "007",
         title: "ORIGINAL SKECHERS MEN'S APPAREL",
         price: 100000,
@@ -82,7 +82,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        id: 8,
+        id: 9998,
         sku: "008",
         title: "ORIGINAL REEBOK WOMEN'S APPAREL",
         price: 90000,
@@ -93,7 +93,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        id: 9,
+        id: 9999,
         sku: "009",
         title: "EDORA SPORTSWEAR",
         price: 165000,
@@ -104,7 +104,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        id: 10,
+        id: 99910,
         sku: "010",
         title: "Living Room Furniture Coffe Table Marmer",
         price: 1950000,
@@ -115,7 +115,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        id: 11,
+        id: 99911,
         sku: "011",
         title: "Sylvanian Families - Children's Bedroom Furniture",
         price: 350888,
@@ -126,7 +126,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        id: 12,
+        id: 99912,
         sku: "012",
         title: "kursi kantor",
         price: 1125000,
@@ -137,7 +137,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        id: 13,
+        id: 99913,
         sku: "013",
         title: "Reagen Albumin 100ml 05-2025",
         price: 690000,
@@ -148,7 +148,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        id: 14,
+        id: 99914,
         sku: "014",
         title: "Patient Monitoring System Versi 2.7 1 Vetom",
         price: 29000000,
@@ -159,7 +159,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        id: 15,
+        id: 99915,
         sku: "015",
         title: "Renz Surgical Instrument Kit Partus set",
         price: 410000,
