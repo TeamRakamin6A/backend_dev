@@ -35,9 +35,10 @@ const createSupplyOrder = async (req, res, next) => {
                 where: {
                     item_id: foundItem.id,
                     warehouse_id 
-
                 },
             })
+
+            console.log(supplyOrder, "<<<<<");
             
             let data = await Supply_Item.create({
                 item_id: foundItem.id,
@@ -130,6 +131,12 @@ const getSupplyOrder = async (req, res, next) => {
                         }
                     }
                 ]
+            }
+        }
+        
+        if(status) {
+            optionFilter.where.status = {
+                [Op.iLike]: `%${status}%`
             }
         }
 
