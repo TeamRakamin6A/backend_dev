@@ -33,10 +33,19 @@ const createSupplyOrder = async (req, res, next) => {
 
             const getStock = await Item_Warehouse.findOne({
                 where: {
-                    warehouse_id
+                    item_id: foundItem.id,
+                    warehouse_id 
+
                 },
             })
             
+            let data = await Supply_Item.create({
+                item_id: foundItem.id,
+                supply_order_id: supplyOrder.id,
+                quantity: supplyItem.quantity,
+                price: foundItem.price
+            }, {transaction: t})
+
             if (!getStock) {
                 throw { name: "errorNotFound" };
             }
@@ -44,18 +53,13 @@ const createSupplyOrder = async (req, res, next) => {
             if (foundItem.price !== supplyItem.price_item) {
                 throw { name: "itemPriceIncorect" };
             }
+            
 
             await supplyOrder.increment("total_price", {
                 by: +supplyItem.price_item * data.quantity,
                 transaction: t,
             });
 
-            const data = await Supply_Item.create({
-                item_id: foundItem.id,
-                supply_order_id: Supply_Order.id,
-                quantity: supplyItem.quantity,
-                price: foundItem.price
-            })
 
 
             totalPrice += +supplyItem.price_item * data.quantity
@@ -64,20 +68,18 @@ const createSupplyOrder = async (req, res, next) => {
             await getStock.increment("quantity", {
                 by: data.quantity,
                 transaction: t,
-            });
-
-
-            supplyOrder.total_price = totalPrice
-            await supplyOrder.save ({ transaction: t })
-            await t.commit();
-
-
-            res.status(201).json({
-                success: true,
-                message: "Supply Order and Supply Items Created successfully",
-                data: supplyOrder,
-            });
+            });           
         }
+        supplyOrder.total_price = totalPrice
+        await supplyOrder.save ({ transaction: t })
+        await t.commit();
+
+
+        res.status(201).json({
+            success: true,
+            message: "Supply Order and Supply Items Created successfully",
+            data: supplyOrder,
+        });
 
     } catch (error) {
         await t.rollback();
