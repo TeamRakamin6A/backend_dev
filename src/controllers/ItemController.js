@@ -93,6 +93,11 @@ const getItems = async (req, res, next) => {
 
 
         if (category_ids) {
+            optionFilter = {
+                where: {
+                    [Op.or]: []
+                }
+            };
             category_ids = category_ids.map((cat_id) => +cat_id)
 
             optionFilter.where[Op.or].push({
