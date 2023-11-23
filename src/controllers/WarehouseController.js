@@ -88,13 +88,13 @@ const moveQuantityToWarehouse = async (req, res, next) => {
 
     const initStock = await Item_Warehouse.findOne({
       where: {
-        [Op.and]: [{ item_id }, { warehouse_id: foundInitWarehouse.id }],
+        item_id,
+        warehouse_id: foundInitWarehouse.id,
       },
       transaction: t,
     });
 
     if (initStock.quantity < stock) {
-      t.rollback();
       throw { name: "lessStockItems" };
     }
 
@@ -104,9 +104,7 @@ const moveQuantityToWarehouse = async (req, res, next) => {
     });
 
     let destStock = await Item_Warehouse.findOne({
-      where: {
-        [Op.and]: [{ item_id }, { warehouse_id: foundDestWarehouse.id }],
-      },
+      where: { item_id, warehouse_id: foundDestWarehouse.id },
       transaction: t,
     });
 

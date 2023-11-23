@@ -7,7 +7,6 @@ OrderRouter.get("/", OrderController.getAllOrder)
 OrderRouter.get('/:id', OrderController.getOrderById)
 OrderRouter.put('/', OrderController.updateOrder)
 OrderRouter.delete('/:id', OrderController.deleteOrder)
-OrderRouter.get("/invoice",OrderController.createInvoice)
 
 
 module.exports = OrderRouter;
