@@ -59,15 +59,15 @@ const getItems = async (req, res, next) => {
         const limit = parseInt(req.query.limit) || 10;
         const q = req.query.q || "";
         let category_ids = req.query.category_ids
-        let optionFilter = {
-            where: {
-                [Op.or]: []
-            }
-        };
-
+        let optionFilter
         const offset = (page - 1) * limit;
 
         if (q) {
+            optionFilter = {
+                where: {
+                    [Op.or]: []
+                }
+            };
 
             let filterTitle = {
                 title: {

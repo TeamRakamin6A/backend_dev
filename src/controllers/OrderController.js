@@ -225,10 +225,24 @@ const deleteOrder = async (req, res, next) => {
     }
 };
 
+const createInvoice = async (req, res, next) => {
+    
+        try {
+            const customer = await Customer.findAll()
+            res.status(200).json({ customer})
+            
+        } catch (error) {
+            next(error);
+            
+        }
+    
+}
+
 module.exports = {
     createOrder,
     getAllOrder,
     getOrderById,
     updateOrder,
     deleteOrder,
+    createInvoice,
 };
