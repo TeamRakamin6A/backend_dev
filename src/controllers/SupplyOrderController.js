@@ -13,7 +13,7 @@ const createSupplyOrder = async (req, res, next) => {
         const supplyOrder = await Supply_Order.create({
             invoice,
             total_price,
-            supplier_id, 
+            supplier_id,
             warehouse_id,
             status
         }, { returning: true, transaction: t })
@@ -34,18 +34,18 @@ const createSupplyOrder = async (req, res, next) => {
             const getStock = await Item_Warehouse.findOne({
                 where: {
                     item_id: foundItem.id,
-                    warehouse_id 
+                    warehouse_id
                 },
             })
 
             console.log(supplyOrder, "<<<<<");
-            
+
             let data = await Supply_Item.create({
                 item_id: foundItem.id,
                 supply_order_id: supplyOrder.id,
                 quantity: supplyItem.quantity,
                 price: foundItem.price
-            }, {transaction: t})
+            }, { transaction: t })
 
             if (!getStock) {
                 throw { name: "errorNotFound" };
@@ -54,7 +54,7 @@ const createSupplyOrder = async (req, res, next) => {
             if (foundItem.price !== supplyItem.price_item) {
                 throw { name: "itemPriceIncorect" };
             }
-            
+
 
             await supplyOrder.increment("total_price", {
                 by: +supplyItem.price_item * data.quantity,
@@ -69,10 +69,10 @@ const createSupplyOrder = async (req, res, next) => {
             await getStock.increment("quantity", {
                 by: data.quantity,
                 transaction: t,
-            });           
+            });
         }
         supplyOrder.total_price = totalPrice
-        await supplyOrder.save ({ transaction: t })
+        await supplyOrder.save({ transaction: t })
         await t.commit();
 
 
@@ -91,14 +91,18 @@ const createSupplyOrder = async (req, res, next) => {
 
 const getSupplyOrder = async (req, res, next) => {
     try {
+        const { id } = req.params;
+
         const page = +req.query.page || 1;
         const limit = +req.query.limit || 10;
         const queryFilter = req.query.q || "";
+        const warehouseId = req.query.warehouseId || null;
+        const supplierId = req.query.supplierId || null;
         const offset = limit * (page - 1);
         const status = req.query.status;
 
         let optionFilter = {
-            where: {},
+            attributes: ['id', 'invoice', 'total_price', 'supplier_id', 'warehouse_id', 'status'],
             include: [
                 {
                     model: Warehouse
@@ -109,16 +113,20 @@ const getSupplyOrder = async (req, res, next) => {
                 {
                     model: Item
                 }
-            ]
+            ], where: {},
         };
 
-        if(queryFilter) {
+        if (id) {
+            optionFilter.where.id = id;
+        }
+
+        if (queryFilter) {
             optionFilter.where = {
                 [Op.or]: [
                     {
                         "$Warehouse.title$": {
                             [Op.iLike]: `%${queryFilter}%`
-                        }  
+                        }
                     },
                     {
                         "$Supplier.company_name$": {
@@ -133,17 +141,25 @@ const getSupplyOrder = async (req, res, next) => {
                 ]
             }
         }
-        
-        if(status) {
+
+        if (status) {
             optionFilter.where.status = {
                 [Op.iLike]: `%${status}%`
             }
         }
 
-        if(status) {
+        if (status) {
             optionFilter.where.status = {
                 [Op.iLike]: `%${status}%`
             }
+        }
+
+        if (warehouseId) {
+            optionFilter.where.warehouse_id = warehouseId;
+        }
+
+        if (supplierId) {
+            optionFilter.where.supplier_id = supplierId;
         }
 
         const { count, rows } = await Supply_Order.findAndCountAll({
