@@ -1,4 +1,3 @@
-const errorHandler = require("../middlewares/ErrorHandlerMiddlware");
 const { Item, Category, Item_Category, Item_Warehouse, Warehouse, sequelize, DataType } = require("../models");
 const { Op } = require("sequelize");
 
@@ -112,10 +111,10 @@ const getItems = async (req, res, next) => {
             include: [{
                 model: Category
             }],
-            ...optionFilter,
-            subQuery: false,
             offset,
             limit,
+            subQuery: false,
+            ...optionFilter,
         });
 
         const totalPages = Math.ceil(count / limit);
@@ -192,13 +191,13 @@ const updateItem = async (req, res, next) => {
             throw { name: "errorNotFound" }
         }
 
-        let updateItem = ({
+        let updateItem = {
             sku: sku || foundItem.sku,
             title: title || foundItem.title,
             price: price || foundItem.price,
             description: description || foundItem.description,
             keywords: keywords || foundItem.keywords
-        }, { returning: true, transaction: t })
+        }
 
         for (let i = 0; i < category_ids.length; i++) {
             const categoryID = category_ids[i]
@@ -219,10 +218,11 @@ const updateItem = async (req, res, next) => {
             }, { transaction: t })
         }
 
-        await t.commit();
         await foundItem.update(updateItem);
+        await t.commit();
         res.status(200).json({ status: true, message: "Item Updated Succesfully" });
     } catch (error) {
+        await t.rollback();
         next(error)
     }
 }
@@ -239,6 +239,7 @@ const uploadImage = async (req, res, next) => {
         if (!file) {
             throw { name: "FileNotExists" }
         }
+        console.log(file);
 
         const image_url = `${process.env.UPLOADPATH}${file.filename}`;
 
