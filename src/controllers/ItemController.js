@@ -199,6 +199,12 @@ const updateItem = async (req, res, next) => {
             keywords: keywords || foundItem.keywords
         }
 
+        await Item_Category.destroy({
+            where: {
+                item_id: foundItem.id,
+            }
+        }, { transaction: t })
+
         for (let i = 0; i < category_ids.length; i++) {
             const categoryID = category_ids[i]
 
