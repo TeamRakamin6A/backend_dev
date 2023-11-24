@@ -113,7 +113,8 @@ const getItems = async (req, res, next) => {
             }],
             offset,
             limit,
-            subQuery: false,
+            // subQuery: false,
+            distinct: true,
             ...optionFilter,
         });
 
