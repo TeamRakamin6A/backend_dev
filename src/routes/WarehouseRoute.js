@@ -9,6 +9,7 @@ WarehouseRouter.put(
   "/quantities/:id",
   WarehoseController.updateQuantityByWarehouse
 );
+WarehouseRouter.post("/addItem/:id", WarehoseController.addItemToWarehouse);
 WarehouseRouter.post("/moves", WarehoseController.moveQuantityToWarehouse);
 WarehouseRouter.get("/:id", WarehoseController.getWarehouseById);
 WarehouseRouter.delete("/:id", WarehoseController.deleteWarehouseById);

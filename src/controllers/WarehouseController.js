@@ -69,6 +69,70 @@ const getAllWarehouses = async (req, res, next) => {
   }
 };
 
+const addItemToWarehouse = async (req, res, next) => {
+  const t = await sequelize.transaction()
+  try {
+    const {id} = req.params;
+    const {item_id, quantity} = req.body;
+
+    // Find Warehouse
+    const foundWarehouse = await Warehouse.findOne({
+      where: {
+        id
+      }
+    })
+
+    if(!foundWarehouse) {
+      throw {name: "errorNotFound"}
+    }
+
+    // Find Item
+    const foundItem = await Item.findOne({
+      where: {
+        id: +item_id
+      }
+    })
+
+    if(!foundItem) {
+      throw {name: "errorNotFound"}
+    }
+
+    // Find Item Warehouse
+
+    // 1. If exists, update item warehouse
+    // 2. If not, create item warehouse
+
+    const foundItemWarehouse = await Item_Warehouse.findOne({
+      where: {
+        item_id: foundItem.id,
+        warehouse_id: foundWarehouse.id
+      }
+    })
+
+    if(!foundItemWarehouse) {
+      // Create Item Warehouse
+
+      await Item_Warehouse.create({
+        item_id: foundItem.id,
+        warehouse_id: foundWarehouse.id,
+        quantity: +quantity
+      }, {transaction: t})
+    } else {
+      // Update Item Warehouse
+      await foundItemWarehouse.update({
+        item_id: foundItem.id,
+        warehouse_id: foundWarehouse.id,
+        quantity: +quantity
+      }, {transaction: t})
+    }
+    await t.commit();
+    res.status(200).json({ message: "Success updating item in warehouse"})
+  } catch(err) {
+    await t.rollback();
+    next(err);
+  }
+}
+
 const moveQuantityToWarehouse = async (req, res, next) => {
   const t = await sequelize.transaction();
   try {
@@ -228,4 +292,5 @@ module.exports = {
   updateWarehouseById,
   updateQuantityByWarehouse,
   moveQuantityToWarehouse,
+  addItemToWarehouse
 };
