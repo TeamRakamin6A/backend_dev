@@ -90,32 +90,28 @@ const getItems = async (req, res, next) => {
         }
 
 
-
-        if (category_ids) {
-            optionFilter = {
-                where: {
-                    [Op.or]: []
-                }
-            };
-            category_ids = category_ids.map((cat_id) => +cat_id)
-
-            optionFilter.where[Op.or].push({
-                '$Categories.id$': {
-                    [Op.in]: category_ids
-                }
-            })
+        let filterCategory = {
+            include: {
+                model: Category
+            }
         }
 
+        if (category_ids) {
+            category_ids = category_ids.map((cat_id) => +cat_id)
+            filterCategory.include.where = {
+                id: {
+                    [Op.in]: category_ids
+                }
+            }
+        }
 
         const { count, rows: items } = await Item.findAndCountAll({
-            include: [{
-                model: Category
-            }],
+            ...filterCategory,
             offset,
             limit,
-            // subQuery: false,
             distinct: true,
             ...optionFilter,
+            order: [['createdAt', 'DESC']]
         });
 
         const totalPages = Math.ceil(count / limit);
