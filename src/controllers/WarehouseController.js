@@ -42,6 +42,9 @@ const getAllWarehouses = async (req, res, next) => {
 
     const { count, rows } = await Warehouse.findAndCountAll({
       ...filterOption,
+      include: {
+        model: Item
+      },
       where: {
         title: {
           [Op.iLike]: `%${title}%`,
