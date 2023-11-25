@@ -168,6 +168,7 @@ const getSupplyOrder = async (req, res, next) => {
             distinct: true,
             offset,
             limit,
+            order: [['createdAt', 'DESC']]
         });
 
 
