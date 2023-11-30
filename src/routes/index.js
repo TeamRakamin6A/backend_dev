@@ -14,6 +14,7 @@ const SupplyOrders = require("./SupplyOrderRoute");
 
 router.post("/api/users/login", UsersController.loginUser);
 router.post("/api/users/register", UsersController.registerUser);
+router.put("/api/users", UsersController.updateUser);
 
 router.use(authMiddleware);
 

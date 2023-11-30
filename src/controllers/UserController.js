@@ -60,10 +60,9 @@ const getUserbyId = async (req, res, next) => {
 
 const updateUser = async (req, res, next) => {
   try {
-    const { id } = req.loggedUser;
     const { email, name, username, oldPassword, newPassword, role } = req.body;
 
-    const foundUser = await User.findOne({ where: { id } });
+    const foundUser = await User.findOne({ where: { email } });
 
     let updateUser = {
       email: email || foundUser.email,
