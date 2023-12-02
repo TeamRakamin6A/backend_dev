@@ -9,7 +9,7 @@ const UsersController = require("../controllers/UserController");
 const CategoryRouter = require('./CategoryRoute')
 const WarehouseRouter = require("./WarehouseRoute");
 const DashboardRouter = require("./DashboardRoute")
-const authMiddleware = require("../middlewares/AuthMiddleware");
+const { authMiddleware } = require("../middlewares/AuthMiddleware");
 const SupplyOrders = require("./SupplyOrderRoute");
 
 router.post("/api/users/login", UsersController.loginUser);

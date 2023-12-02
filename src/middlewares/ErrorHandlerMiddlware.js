@@ -4,6 +4,8 @@ const errorHandler = (err, req, res, next) => {
     res.status(404).json({ status: false, message: "Error Not Found" });
   } else if (err.name === "Unauthenticated") {
     res.status(401).json({ status: false, message: "Unauthenticated User" });
+  } else if (err.name === "Unauthorized") {
+    res.status(403).json({ status: false, message: "Unauthorized User Role" });
   } else if (err.name === "userAlreadyExist") {
     res
       .status(400)

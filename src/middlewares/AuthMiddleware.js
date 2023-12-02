@@ -29,4 +29,11 @@ const authMiddleware = async (req, res, next) => {
   }
 };
 
-module.exports = authMiddleware;
+const authorization = (req, res, next) => {
+  if (req.loggedUser.role !== "superadmin") {
+    throw { name: "Unauthorized" }
+  }
+  next()
+}
+
+module.exports = { authMiddleware, authorization };
