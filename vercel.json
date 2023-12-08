@@ -1,6 +1,13 @@
 {
-    "rewrites": [{ 
-        "source": "/src/(.*)", 
-        "destination": "/src" 
-    }]
-}
+    "version": 2,
+    "env": {
+      "NODE_ENV": "production"
+    },
+    "builds": [
+      {
+        "src": "app.js", 
+        "use": "@now/node-server"
+      }
+    ],
+    "cleanUrls": true 
+  }
