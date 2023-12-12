@@ -1,6 +1,5 @@
 const { Op, where } = require("sequelize");
 const { Item, Supplier, Warehouse, Item_Warehouse, Supply_Order, Supply_Item, sequelize } = require("../models");
-const { get } = require("../routes/SupplyOrderRoute");
 
 
 // Create Supply Order
